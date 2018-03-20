@@ -28,32 +28,31 @@ import (
 func main() {
 
     accessTokenAPI := "https://qyapi.weixin.qq.com/cgi-bin/gettoken"
-	corpID := "xxxxxx"
+    corpID := "xxxxxx"
     appSecret := "xxxxxxxx"
     sendMessageAPIURL := "https://qyapi.weixin.qq.com/cgi-bin/message/send"
     
-	message := &weixin.Message{
-		MsgType: weixin.TEXT, // 目前只支持发送文本消息
-		ToTag:   "1",         // ToTag 是在企业微信后台定义的标签ID，标签里面可以包含很多人 还有ToUser,ToParty参数 指定用户和部门ID
-		AgentID: 1000002,    // 企业应用的id，整型。可在应用的设置页面查看
-		Safe:    0,          // 表示是否是保密消息，0表示否，1表示是，默认0
-		Text: &weixin.Text{
-			Content: "有报警啦, 主机: xxx 报警内容: xxxx",
-		},
-	}
+    message := &weixin.Message{
+        MsgType: weixin.TEXT, // 目前只支持发送文本消息
+        ToTag:   "1",         // ToTag 是在企业微信后台定义的标签ID，标签里面可以包含很多人 还有ToUser,ToParty参数 指定用户和部门ID
+        AgentID: 1000002,    // 企业应用的id，整型。可在应用的设置页面查看
+        Safe:    0,          // 表示是否是保密消息，0表示否，1表示是，默认0
+        Text: &weixin.Text{
+            Content: "有报警啦, 主机: xxx 报警内容: xxxx",
+        },
+    }
 
-	sendMessageAPIURL := "https://qyapi.weixin.qq.com/cgi-bin/message/send"
-	client2 := &weixin.Client{
-		AccessTokenAPI: accessTokenAPI,
-		APIURL:         sendMessageAPIURL,
-		CorpID:         corpID,
-		CorpSecret:     appSecret,
-		Message:        message,
-	}
-	ok, err := client2.SendMessage()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	fmt.Println(ok)
+    client2 := &weixin.Client{
+        AccessTokenAPI: accessTokenAPI,
+        APIURL:         sendMessageAPIURL,
+        CorpID:         corpID,
+        CorpSecret:     appSecret,
+        Message:        message,
+    }
+    ok, err := client2.SendMessage()
+    if err != nil {
+        log.Fatalln(err)
+    }
+    fmt.Println(ok)
 }
 ```
