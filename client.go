@@ -18,24 +18,26 @@ var (
 
 // Client 微信
 type Client struct {
-	APIURL      string
-	AccessToken string
-	Message     *Message
+	AccessTokenAPI string
+	APIURL         string
+	CorpID         string
+	CorpSecret     string
+	Message        *Message
 }
 
 // GetAccessToken 获取AccessToken
 // corpid 每个企业都拥有唯一的corpid，获取此信息可在管理后台“我的企业”－“企业信息”下查看（需要有管理员权限）
 // corpsecret 每个应用有独立的secret，所以每个应用的access_token应该分开来获取 在管理后台->“企业应用”->点进应用
-func (c *Client) GetAccessToken(corpid, corpsecret string) (string, error) {
+func (c *Client) GetAccessToken() (string, error) {
 
 	o := &grequests.RequestOptions{
 		Params: map[string]string{
-			"corpid":     corpid,
-			"corpsecret": corpsecret,
+			"corpid":     c.CorpID,
+			"corpsecret": c.CorpSecret,
 		},
 	}
 
-	resp, err := grequests.Get(c.APIURL, o)
+	resp, err := grequests.Get(c.AccessTokenAPI, o)
 	if err != nil {
 		return "", err
 	}
@@ -55,9 +57,13 @@ func (c *Client) SendMessage() (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	accessToken, err := c.GetAccessToken()
+	if err != nil {
+		return false, err
+	}
 	o := &grequests.RequestOptions{
 		Params: map[string]string{
-			"access_token": c.AccessToken,
+			"access_token": accessToken,
 		},
 		Headers: map[string]string{
 			"Content-Type": "application/json",
@@ -70,8 +76,12 @@ func (c *Client) SendMessage() (bool, error) {
 	}
 	respJSON := resp.String()
 	errcode := gjson.Get(respJSON, "errcode")
-	if errcode.Int() != 0 {
-		return false, WeixinErr(errcode.Int(), gjson.Get(respJSON, "errmsg").String())
+	errcodeInt := errcode.Int()
+	if errcodeInt == 0 {
+		return true, nil
 	}
-	return true, nil
+	if errcodeInt == 42001 {
+		c.SendMessage()
+	}
+	return false, WeixinErr(errcodeInt, gjson.Get(respJSON, "errmsg").String())
 }
