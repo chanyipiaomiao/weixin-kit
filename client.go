@@ -80,8 +80,6 @@ func (c *Client) SendMessage() (bool, error) {
 	if errcodeInt == 0 {
 		return true, nil
 	}
-	if errcodeInt == 42001 {
-		c.SendMessage()
-	}
+
 	return false, WeixinErr(errcodeInt, gjson.Get(respJSON, "errmsg").String())
 }
